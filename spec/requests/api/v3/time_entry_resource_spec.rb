@@ -60,6 +60,9 @@ describe 'API v3 time_entry resource', type: :request do
                        value: '1234',
                        customized: time_entry)
   end
+  let(:activity) do
+    FactoryGirl.create(:time_entry_activity)
+  end
 
   subject(:response) { last_response }
 
@@ -303,6 +306,39 @@ describe 'API v3 time_entry resource', type: :request do
         expect(subject.status)
           .to eql(404)
       end
+    end
+  end
+
+  describe 'POST api/v3/time_entries' do
+    let(:path) { api_v3_paths.time_entries }
+    let(:params) do
+      {
+        "_links": {
+          "project": {
+            "href": api_v3_paths.project(project.id)
+          },
+          "activity": {
+            "href": api_v3_paths.time_entries_activity(activity.id)
+          }
+        },
+        "hours": 'PT0S',
+        "comment": "some comment"
+      }
+    end
+
+    before do
+      work_package
+
+      post path, params.to_json, 'CONTENT_TYPE' => 'application/json'
+    end
+
+    it 'responds 201 CREATED' do
+      expect(subject.status).to eq(201)
+    end
+
+    it 'creates another time entry' do
+      expect(TimeEntry.count)
+        .to eql 1
     end
   end
 end

@@ -49,6 +49,16 @@ module API
             end
           end
 
+          post do
+            entry = TimeEntry.new
+            binding.pry
+            entry = TimeEntryRepresenter.create(entry, current_user: current_user).from_hash(request_body)
+
+            entry.save!
+
+            status 201
+          end
+
           params do
             requires :id, desc: 'Time entry\'s id'
           end
