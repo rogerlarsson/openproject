@@ -50,8 +50,7 @@ module API
           end
 
           post do
-            entry = TimeEntry.new
-            binding.pry
+            entry = TimeEntry.new user: current_user
             entry = TimeEntryRepresenter.create(entry, current_user: current_user).from_hash(request_body)
 
             entry.save!

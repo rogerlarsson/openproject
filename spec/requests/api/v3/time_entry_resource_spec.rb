@@ -321,8 +321,9 @@ describe 'API v3 time_entry resource', type: :request do
             "href": api_v3_paths.time_entries_activity(activity.id)
           }
         },
-        "hours": 'PT0S',
-        "comment": "some comment"
+        "hours": 'PT5H',
+        "comment": "some comment",
+        "spentOn": "2017-07-28"
       }
     end
 
