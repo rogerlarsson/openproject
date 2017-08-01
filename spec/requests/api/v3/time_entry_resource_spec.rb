@@ -61,7 +61,7 @@ describe 'API v3 time_entry resource', type: :request do
                        customized: time_entry)
   end
   let(:activity) do
-    FactoryGirl.create(:time_entry_activity)
+    FactoryBot.create(:time_entry_activity)
   end
 
   subject(:response) { last_response }
@@ -319,6 +319,9 @@ describe 'API v3 time_entry resource', type: :request do
           },
           "activity": {
             "href": api_v3_paths.time_entries_activity(activity.id)
+          },
+          "workPackage": {
+            "href": api_v3_paths.work_package(work_package.id)
           }
         },
         "hours": 'PT5H',
@@ -337,9 +340,41 @@ describe 'API v3 time_entry resource', type: :request do
       expect(subject.status).to eq(201)
     end
 
-    it 'creates another time entry' do
+    it 'creates another time entry with the provided values' do
       expect(TimeEntry.count)
         .to eql 1
+
+      new_entry = TimeEntry.first
+
+      expect(new_entry.user)
+        .to eql current_user
+
+      expect(new_entry.project)
+        .to eql project
+
+      expect(new_entry.activity)
+        .to eql activity
+
+      expect(new_entry.work_package)
+        .to eql work_package
+
+      expect(new_entry.hours)
+        .to eql 5.0
+
+      expect(new_entry.comments)
+        .to eql "some comment"
+
+      expect(new_entry.spent_on)
+        .to eql Date.parse("2017-07-28")
+    end
+
+    context 'when lacking permissions' do
+      let(:permissions) { [:view_time_entries] }
+
+      it 'returns 403' do
+        expect(subject.status)
+          .to eql(403)
+      end
     end
   end
 end

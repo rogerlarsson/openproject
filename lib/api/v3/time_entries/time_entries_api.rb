@@ -51,11 +51,22 @@ module API
 
           post do
             entry = TimeEntry.new user: current_user
-            entry = TimeEntryRepresenter.create(entry, current_user: current_user).from_hash(request_body)
+            entry = TimeEntryRepresenter
+                    .create(entry, current_user: current_user)
+                    .from_hash(request_body)
 
-            entry.save!
+            result = CreateTimeEntryService
+                     .new(user: current_user)
+                     .call(entry)
 
-            status 201
+            if result.success?
+              new_entry = result.result
+              TimeEntryRepresenter.create(new_entry,
+                                          current_user: current_user,
+                                          embed_links: true)
+            else
+              fail ::API::Errors::ErrorBase.create_and_merge_errors(result.errors)
+            end
           end
 
           params do
