@@ -1,5 +1,3 @@
-#-- encoding: UTF-8
-
 #-- copyright
 # OpenProject is a project management system.
 # Copyright (C) 2012-2017 the OpenProject Foundation (OPF)
@@ -28,24 +26,26 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-module TimeEntries
-  class CreateContract < BaseContract
-    # TODO: add tests
-    attribute :user_id do
-      errors.add :user_id, :invalid if model.user != user
-    end
+module API
+  module V3
+    class ParseResourceParamsService
+      attr_accessor :model,
+                    :representer
 
-    def validate
-      user_allowed_to_add
+      def initialize(model, representer)
+        self.model = model
+        self.representer = representer
+      end
 
-      super
-    end
+      def call(request_body, current_user)
+        struct = OpenStruct.new available_custom_fields: model.new.available_custom_fields
 
-    private
+        representer
+          .create(struct, current_user: current_user)
+          .from_hash(request_body)
 
-    def user_allowed_to_add
-      if model.project && !user.allowed_to?(:log_time, model.project)
-        errors.add :base, :error_unauthorized
+        ServiceResult.new(success: true,
+                          result: struct.to_h.except(:available_custom_fields))
       end
     end
   end

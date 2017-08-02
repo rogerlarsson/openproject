@@ -50,14 +50,14 @@ module API
           end
 
           post do
-            entry = TimeEntry.new user: current_user
-            entry = TimeEntryRepresenter
-                    .create(entry, current_user: current_user)
-                    .from_hash(request_body)
+            params = API::V3::ParseResourceParamsService
+                     .new(TimeEntry, TimeEntryRepresenter)
+                     .call(request_body, current_user)
+                     .result
 
             result = CreateTimeEntryService
                      .new(user: current_user)
-                     .call(entry)
+                     .call(params)
 
             if result.success?
               new_entry = result.result
