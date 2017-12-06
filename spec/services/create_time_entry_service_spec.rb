@@ -31,6 +31,7 @@ require 'spec_helper'
 describe CreateTimeEntryService, type: :model do
   let(:user) { FactoryGirl.build_stubbed(:user) }
   let(:activity) { FactoryGirl.build_stubbed(:time_entry_activity) }
+  let(:default_activity) { FactoryGirl.build_stubbed(:time_entry_activity, is_default: true) }
   let(:work_package) { FactoryGirl.build_stubbed(:work_package) }
   let(:project) { FactoryGirl.build_stubbed(:project) }
   let(:spent_on) { Date.today.to_s }
@@ -93,6 +94,17 @@ describe CreateTimeEntryService, type: :model do
       .to eql user
   end
 
+  it 'assigns the default TimeEntryActivity' do
+    allow(TimeEntryActivity)
+      .to receive(:default)
+      .and_return(default_activity)
+
+    subject
+
+    expect(time_entry_instance.activity)
+      .to eql default_activity
+  end
+
   context 'with params' do
     let(:user2) { FactoryGirl.build_stubbed(:user) }
     let(:params) do
@@ -128,6 +140,36 @@ describe CreateTimeEntryService, type: :model do
 
       expect(attributes_of_interest)
         .to eql(expected)
+    end
+  end
+
+  context 'with hours == 0' do
+    let(:params) do
+      {
+        hours: 0
+      }
+    end
+
+    it 'sets hours to nil' do
+      subject
+
+      expect(time_entry_instance.hours)
+        .to be_nil
+    end
+  end
+
+  context 'with project not specified' do
+    let(:params) do
+      {
+        work_package: work_package
+      }
+    end
+
+    it 'sets the project to the work_package\'s project' do
+      subject
+
+      expect(time_entry_instance.project)
+        .to eql(work_package.project)
     end
   end
 

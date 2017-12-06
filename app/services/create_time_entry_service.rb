@@ -44,9 +44,9 @@ class CreateTimeEntryService
 
     initialize_contract(time_entry)
 
-    assign_defaults(time_entry)
-
     time_entry.attributes = params
+
+    assign_defaults(time_entry)
 
     result, errors = validate_and_save(time_entry)
 
@@ -72,6 +72,9 @@ class CreateTimeEntryService
 
   def assign_defaults(time_entry)
     time_entry.user ||= user
+    time_entry.activity ||= TimeEntryActivity.default
+    time_entry.hours = nil if time_entry.hours && time_entry.hours.zero?
+    time_entry.project ||= time_entry.work_package.project if time_entry.work_package
   end
 
   def initialize_contract(time_entry)
