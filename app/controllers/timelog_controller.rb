@@ -150,6 +150,12 @@ class TimelogController < ApplicationController
   end
 
   def create
+    combined_params = permitted_params
+                      .time_entry
+                      .to_h
+                      .merge(project: @project,
+                             work_package_id: @issue)
+
     call = CreateTimeEntryService
            .new(user: current_user)
            .call(permitted_params.time_entry.to_h)

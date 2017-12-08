@@ -48,14 +48,12 @@ class CreateTimeEntryService
 
     assign_defaults(time_entry)
 
-    result, errors = validate_and_save(time_entry)
+    _, errors = validate_and_save(time_entry)
 
-    ServiceResult.new(success: result,
+    ServiceResult.new(success: errors.empty?,
                       errors: errors,
                       result: time_entry)
   end
-
-  # TODO: move default value setting from time_entry.rb to here
 
   private
 
