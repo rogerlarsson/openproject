@@ -150,10 +150,13 @@ class TimelogController < ApplicationController
   end
 
   def create
-    # TODO: use service
-    @time_entry = new_time_entry(@project, @issue, permitted_params.time_entry.to_h)
+    call = CreateTimeEntryService
+           .new(user: current_user)
+           .call(permitted_params.time_entry.to_h)
 
-    save_time_entry_and_respond @time_entry
+    @time_entry = call.result
+
+    respond_for_saving call.success?
   end
 
   def edit
