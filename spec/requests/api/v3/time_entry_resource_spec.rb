@@ -214,9 +214,9 @@ describe 'API v3 time_entry resource', type: :request do
 
       before do
         FactoryBot.create(:member,
-                           roles: [role],
-                           project: other_project,
-                           user: current_user)
+                          roles: [role],
+                          project: other_project,
+                          user: current_user)
 
         time_entry
         other_time_entry
@@ -310,6 +310,7 @@ describe 'API v3 time_entry resource', type: :request do
   end
 
   describe 'POST api/v3/time_entries' do
+    let(:permissions) { %i(view_time_entries log_time view_work_packages) }
     let(:path) { api_v3_paths.time_entries }
     let(:params) do
       {
@@ -369,7 +370,7 @@ describe 'API v3 time_entry resource', type: :request do
     end
 
     context 'when lacking permissions' do
-      let(:permissions) { [:view_time_entries] }
+      let(:permissions) { %i(view_time_entries view_work_packages) }
 
       it 'returns 403' do
         expect(subject.status)

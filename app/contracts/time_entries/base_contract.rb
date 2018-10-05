@@ -45,13 +45,5 @@ module TimeEntries
     attribute :tyear
     attribute :tmonth
     attribute :tweek
-
-    attr_accessor :user
-
-    def initialize(time_entry, user)
-      super(time_entry)
-
-      @user = user
-    end
   end
 end

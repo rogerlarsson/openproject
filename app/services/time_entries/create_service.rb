@@ -1,3 +1,5 @@
+#-- encoding: UTF-8
+
 #-- copyright
 # OpenProject is a project management system.
 # Copyright (C) 2012-2017 the OpenProject Foundation (OPF)
@@ -26,43 +28,38 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    class ParseResourceParamsService
-      attr_accessor :model,
-                    :representer,
-                    :current_user
+module TimeEntries
+  class CreateService
+    include Concerns::Contracted
 
-      def initialize(user, model, representer)
-        self.current_user = user
-        self.model = model
-        self.representer = representer
-      end
+    attr_reader :user
 
-      def call(request_body)
-        parsed = if request_body
-                   parse_attributes(request_body)
-                 else
-                   {}
-                 end
+    def initialize(user:)
+      @user = user
+      self.contract_class = TimeEntries::CreateContract
+    end
 
-        ServiceResult.new(success: true,
-                          result: parsed)
-      end
+    def call(params)
+      time_entry = TimeEntry.new
 
-      private
+      time_entry.attributes = params
 
-      def parse_attributes(request_body)
-        representer
-          .create(struct, current_user: current_user)
-          .from_hash(request_body)
-          .to_h
-          .except(:available_custom_fields)
-      end
+      assign_defaults(time_entry)
 
-      def struct
-        OpenStruct.new available_custom_fields: model.new.available_custom_fields
-      end
+      success, errors = validate_and_save(time_entry, user)
+
+      ServiceResult.new(success: success,
+                        errors: errors,
+                        result: time_entry)
+    end
+
+    private
+
+    def assign_defaults(time_entry)
+      time_entry.user ||= user
+      time_entry.activity ||= TimeEntryActivity.default
+      time_entry.hours = nil if time_entry.hours&.zero?
+      time_entry.project ||= time_entry.work_package.project if time_entry.work_package
     end
   end
 end

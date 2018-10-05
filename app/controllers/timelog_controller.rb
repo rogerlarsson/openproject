@@ -153,12 +153,12 @@ class TimelogController < ApplicationController
     combined_params = permitted_params
                       .time_entry
                       .to_h
-                      .merge(project: @project,
-                             work_package_id: @issue)
+                      .reverse_merge(project: @project,
+                                     work_package_id: @issue)
 
-    call = CreateTimeEntryService
+    call = TimeEntries::CreateService
            .new(user: current_user)
-           .call(permitted_params.time_entry.to_h)
+           .call(combined_params)
 
     @time_entry = call.result
 

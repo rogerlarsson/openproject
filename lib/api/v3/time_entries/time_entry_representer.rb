@@ -96,14 +96,14 @@ module API
                               }
                             },
                             setter: ->(fragment:, **) {
-                              link = ::API::Decorators::LinkObject.new(represented,
-                                                                       path: :time_entries_activity,
-                                                                       property_name: :time_entries_activity,
-                                                                       namespace: 'time_entries/activities',
-                                                                       getter: :activity_id,
-                                                                       setter: :"activity_id=")
-
-                              link.from_hash(fragment)
+                              ::API::Decorators::LinkObject
+                                .new(represented,
+                                     path: :time_entries_activity,
+                                     property_name: :time_entries_activity,
+                                     namespace: 'time_entries/activities',
+                                     getter: :activity_id,
+                                     setter: :"activity_id=")
+                                .from_hash(fragment)
                             }
 
         def _type

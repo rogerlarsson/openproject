@@ -28,54 +28,53 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-class CreateTimeEntryService
-  include Concerns::Contracted
-
-  self.contract = TimeEntries::CreateContract
-
-  attr_reader :user
-
-  def initialize(user:)
-    @user = user
-  end
-
-  def call(params)
-    time_entry = TimeEntry.new
-
-    initialize_contract(time_entry)
-
-    time_entry.attributes = params
-
-    assign_defaults(time_entry)
-
-    _, errors = validate_and_save(time_entry)
-
-    ServiceResult.new(success: errors.empty?,
-                      errors: errors,
-                      result: time_entry)
-  end
-
-  private
-
-  # TODO: extract into module
-  def validate_and_save(object)
-    if !contract.validate
-      [false, contract.errors]
-    elsif !object.save
-      [false, object.errors]
-    else
-      [object, object.errors]
+module Changesets
+  class LogTimeService
+    def initialize(user:, changeset:)
+      self.user = user
+      self.changeset = changeset
     end
-  end
 
-  def assign_defaults(time_entry)
-    time_entry.user ||= user
-    time_entry.activity ||= TimeEntryActivity.default
-    time_entry.hours = nil if time_entry.hours && time_entry.hours.zero?
-    time_entry.project ||= time_entry.work_package.project if time_entry.work_package
-  end
+    def call(work_package, hours)
+      service_result = TimeEntries::CreateService
+                       .new(user: user)
+                       .call(combined_parameters(work_package, hours))
 
-  def initialize_contract(time_entry)
-    self.contract = self.class.contract.new(time_entry, user)
+      log_error(service_result)
+
+      service_result
+    end
+
+    private
+
+    attr_accessor :user,
+                  :changeset
+
+    def combined_parameters(work_package, hours)
+      params = {
+        hours: hours,
+        work_package: work_package,
+        spent_on: changeset.commit_date,
+        comments: I18n.t(:text_time_logged_by_changeset, value: changeset.text_tag, locale: Setting.default_language)
+      }
+
+      activity = log_time_activity
+
+      params[:activity] = activity if activity.present?
+
+      params
+    end
+
+    def log_error(service_result)
+      unless service_result.success?
+        logger&.warn("TimeEntry could not be created by changeset #{id}: #{service_result.errors.full_messages}")
+      end
+    end
+
+    def log_time_activity
+      if Setting.commit_logtime_activity_id.to_i.positive?
+        TimeEntryActivity.find_by(id: Setting.commit_logtime_activity_id.to_i)
+      end
+    end
   end
 end

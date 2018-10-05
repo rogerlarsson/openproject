@@ -32,7 +32,7 @@ describe ::API::V3::TimeEntries::TimeEntryRepresenter, 'rendering' do
   include ::API::V3::Utilities::PathHelper
 
   let(:time_entry) do
-    FactoryGirl.build_stubbed(:time_entry,
+    FactoryBot.build_stubbed(:time_entry,
                               comments: 'blubs',
                               spent_on: Date.today - 3.days,
                               created_on: DateTime.now - 6.hours,
@@ -41,22 +41,22 @@ describe ::API::V3::TimeEntries::TimeEntryRepresenter, 'rendering' do
                               project: project,
                               user: user)
   end
-  let(:project) { FactoryGirl.build_stubbed(:project) }
-  let(:project2) { FactoryGirl.build_stubbed(:project) }
+  let(:project) { FactoryBot.build_stubbed(:project) }
+  let(:project2) { FactoryBot.build_stubbed(:project) }
   let(:work_package) { time_entry.work_package }
-  let(:work_package2) { FactoryGirl.build_stubbed(:work_package) }
-  let(:activity) { FactoryGirl.build_stubbed(:time_entry_activity) }
-  let(:activity2) { FactoryGirl.build_stubbed(:time_entry_activity) }
-  let(:user) { FactoryGirl.build_stubbed(:user) }
-  let(:user2) { FactoryGirl.build_stubbed(:user) }
+  let(:work_package2) { FactoryBot.build_stubbed(:work_package) }
+  let(:activity) { FactoryBot.build_stubbed(:time_entry_activity) }
+  let(:activity2) { FactoryBot.build_stubbed(:time_entry_activity) }
+  let(:user) { FactoryBot.build_stubbed(:user) }
+  let(:user2) { FactoryBot.build_stubbed(:user) }
   let(:representer) do
     described_class.create(time_entry, current_user: user, embed_links: true)
   end
   let(:custom_field13) do
-    FactoryGirl.build_stubbed(:time_entry_custom_field, field_format: 'user', id: 13)
+    FactoryBot.build_stubbed(:time_entry_custom_field, field_format: 'user', id: 13)
   end
   let(:custom_field11) do
-    FactoryGirl.build_stubbed(:time_entry_custom_field, field_format: 'text', id: 11)
+    FactoryBot.build_stubbed(:time_entry_custom_field, field_format: 'text', id: 11)
   end
 
   let(:hash) do

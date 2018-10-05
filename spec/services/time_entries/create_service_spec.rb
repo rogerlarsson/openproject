@@ -28,12 +28,12 @@
 
 require 'spec_helper'
 
-describe CreateTimeEntryService, type: :model do
-  let(:user) { FactoryGirl.build_stubbed(:user) }
-  let(:activity) { FactoryGirl.build_stubbed(:time_entry_activity) }
-  let(:default_activity) { FactoryGirl.build_stubbed(:time_entry_activity, is_default: true) }
-  let(:work_package) { FactoryGirl.build_stubbed(:work_package) }
-  let(:project) { FactoryGirl.build_stubbed(:project) }
+describe TimeEntries::CreateService, type: :model do
+  let(:user) { FactoryBot.build_stubbed(:user) }
+  let(:activity) { FactoryBot.build_stubbed(:time_entry_activity) }
+  let(:default_activity) { FactoryBot.build_stubbed(:time_entry_activity, is_default: true) }
+  let(:work_package) { FactoryBot.build_stubbed(:work_package) }
+  let(:project) { FactoryBot.build_stubbed(:project) }
   let(:spent_on) { Date.today.to_s }
   let(:hours) { 5.0 }
   let(:comments) { 'some comment' }
@@ -106,7 +106,7 @@ describe CreateTimeEntryService, type: :model do
   end
 
   context 'with params' do
-    let(:user2) { FactoryGirl.build_stubbed(:user) }
+    let(:user2) { FactoryBot.build_stubbed(:user) }
     let(:params) do
       {
         user: user2,

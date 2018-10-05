@@ -107,8 +107,8 @@ class TimeEntry < ActiveRecord::Base
   end
 
   private
+
   # TODO: move to contract
-  # TODO: adapt timelog controller to make use of contract/service
 
   def validate_hours_are_in_range
     errors.add :hours, :invalid if hours && hours < 0

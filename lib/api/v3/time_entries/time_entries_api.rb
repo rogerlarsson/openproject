@@ -51,11 +51,11 @@ module API
 
           post do
             params = API::V3::ParseResourceParamsService
-                     .new(TimeEntry, TimeEntryRepresenter)
-                     .call(request_body, current_user)
+                     .new(current_user, TimeEntry, TimeEntryRepresenter)
+                     .call(request_body)
                      .result
 
-            result = CreateTimeEntryService
+            result = ::TimeEntries::CreateService
                      .new(user: current_user)
                      .call(params)
 
