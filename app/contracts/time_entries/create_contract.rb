@@ -30,7 +30,6 @@
 
 module TimeEntries
   class CreateContract < BaseContract
-    # TODO: add tests
     attribute :user_id do
       errors.add :user_id, :invalid if model.user != user
     end

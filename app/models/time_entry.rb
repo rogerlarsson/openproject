@@ -111,7 +111,7 @@ class TimeEntry < ActiveRecord::Base
   # TODO: move to contract
 
   def validate_hours_are_in_range
-    errors.add :hours, :invalid if hours && hours < 0
+    errors.add :hours, :invalid if hours && hours.negative?
   end
 
   def validate_project_is_set
