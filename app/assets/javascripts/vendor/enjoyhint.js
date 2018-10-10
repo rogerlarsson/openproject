@@ -41,6 +41,7 @@ var EnjoyHint;
             }
 
             $body.css({'overflow':'hidden'});
+            $body.addClass('enjoyhint-tutorial');
 
             $(document).on("touchmove",lockTouch);
 
@@ -68,6 +69,7 @@ var EnjoyHint;
 
             $('.enjoyhint').remove();
             $body.css({'overflow':'auto'});
+            $body.removeClass('enjoyhint-tutorial');
             $(document).off("touchmove", lockTouch);
         };
 
