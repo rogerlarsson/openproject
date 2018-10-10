@@ -1,11 +1,12 @@
 (function ($) {
     $(function() {
-        var tutorial_instance;
         var preventClickHandler = function(e) {
             e.preventDefault();
             e.stopPropagation();
         };
-        var onboardng_tour_steps_1 = [
+        var localStorageKey = 'openProject-onboardingTour';
+
+        var OverviewOnboardingTourSteps = [
             {
                 'next #logo' : I18n.t('js.onboarding.steps.welcome'),
                 'showSkip' : false
@@ -47,20 +48,19 @@
             }
         ];
 
-        var onboardng_tour_steps_2 = [
+        var WpOnboardingTourSteps = [
             {
                 'custom .wp-table--row' : I18n.t('js.onboarding.steps.wp_list'),
                 'showSkip' : false,
-                'timeout' : 800,
                 'margin' : 5,
                 onBeforeStart: function(){
                     $('.enjoyhint').toggleClass('-clickable', true);
                     // Handle next step
                     $('.wp-table--row').dblclick(function() {
-                        tutorial_instance.trigger('next');
+                        tutorialInstance.trigger('next');
                     });
                     $('.wp-table--cell-td.id a').click(function() {
-                        tutorial_instance.trigger('next');
+                        tutorialInstance.trigger('next');
                     });
 
                     // Disable clicks on the wp context menu links
@@ -100,35 +100,57 @@
             {
                 'next .menu-item--help' : I18n.t('js.onboarding.steps.help_menu'),
                 'shape' : 'circle',
-                "nextButton" : {className: "myNext", text: "Got it"},
+                "nextButton" : {text: "Got it"},
                 'showSkip' : false
             }
         ];
 
 
-        $('#onboarding_tour_enjoyhint').click(function () {
-            tutorial_instance = new EnjoyHint();
-            tutorial_instance.set(onboardng_tour_steps_1);
-            startOnboardingTutorial();
-        });
+        // ------------------------------- Tutorial Overview page -------------------------------
 
-        if (top.location.pathname === '/projects/project-with-no-members/work_packages')
-        {
-            // ToDo: Do this right
-            window.setTimeout(function() {
-                tutorial_instance = new EnjoyHint({
-                    onSkip: function () {
-                        $('.wp-table--details-link, .wp-table-context-menu-link').removeClass('-disabled').unbind('click', preventClickHandler);
-                    }
-                });
-                tutorial_instance.set(onboardng_tour_steps_2);
+        if (window.OpenProject.guardedLocalStorage("openProject-onboardingTour") === "homescreenFinished") {
+            var tutorialInstance = new EnjoyHint({
+                onEnd: function () {
+                    window.OpenProject.guardedLocalStorage(localStorageKey, 'overviewFinished');
+                },
+                onSkip: function () {
+                    window.OpenProject.guardedLocalStorage(localStorageKey, 'skipped');
+                }
+            });
 
-                startOnboardingTutorial();
-            }, 4000);
-        }
+            tutorialInstance.set(OverviewOnboardingTourSteps);
+            tutorialInstance.run();
+        };
 
-        function startOnboardingTutorial() {
-            tutorial_instance.run();
+
+        // ------------------------------- Tutorial WP page -------------------------------
+
+        if (window.OpenProject.guardedLocalStorage("openProject-onboardingTour") === "overviewFinished") {
+            var tutorialInstance = new EnjoyHint({
+                onEnd: function () {
+                    window.OpenProject.guardedLocalStorage(localStorageKey, 'wpFinished');
+                },
+                onSkip: function () {
+                    window.OpenProject.guardedLocalStorage(localStorageKey, 'skipped');
+                    $('.wp-table--details-link, .wp-table-context-menu-link').removeClass('-disabled').unbind('click', preventClickHandler);
+                }
+            });
+
+            // Wait for the WP table to be ready
+            var observer = new MutationObserver(function (mutations, observerInstance) {
+                if ($('.work-package--results-tbody')) {
+                    observerInstance.disconnect(); // stop observing
+
+                    tutorialInstance.set(WpOnboardingTourSteps);
+                    tutorialInstance.run();
+                    return;
+                }
+            });
+            observer.observe($('.work-packages-split-view--tabletimeline-side')[0], {
+                childList: true,
+                subtree: true
+            });
+
         }
     });
 }(jQuery));
