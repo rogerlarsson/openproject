@@ -6,11 +6,24 @@
         };
         var localStorageKey = 'openProject-onboardingTour';
 
-        var OverviewOnboardingTourSteps = [
+        var homescreenTourSteps = [
             {
                 'next #logo' : I18n.t('js.onboarding.steps.welcome'),
                 'showSkip' : false
             },
+            {
+                "description" : I18n.t('js.onboarding.steps.project_selection'),
+                'selector' : '.widget-box.projects .widget-box--arrow-links',
+                'event' : 'click',
+                'showSkip' : false,
+                'containerClass' : '-dark',
+                onBeforeStart: function () {
+                    $('.enjoyhint').toggleClass('-clickable', true);
+                }
+            }
+        ];
+
+        var overviewOnboardingTourSteps = [
             {
                 'next #content' : I18n.t('js.onboarding.steps.project_overview'),
                 'showSkip' : false,
@@ -48,7 +61,7 @@
             }
         ];
 
-        var WpOnboardingTourSteps = [
+        var wpOnboardingTourSteps = [
             {
                 'custom .wp-table--row' : I18n.t('js.onboarding.steps.wp_list'),
                 'showSkip' : false,
@@ -106,6 +119,23 @@
         ];
 
 
+        // ------------------------------- Tutorial Homescreen page -------------------------------
+
+        if (!window.OpenProject.guardedLocalStorage("openProject-onboardingTour")) {
+            var tutorialInstance = new EnjoyHint({
+                onEnd: function () {
+                    window.OpenProject.guardedLocalStorage(localStorageKey, 'homescreenFinished');
+                },
+                onSkip: function () {
+                    window.OpenProject.guardedLocalStorage(localStorageKey, 'skipped');
+                }
+            });
+
+            tutorialInstance.set(homescreenTourSteps);
+            tutorialInstance.run();
+        };
+
+
         // ------------------------------- Tutorial Overview page -------------------------------
 
         if (window.OpenProject.guardedLocalStorage("openProject-onboardingTour") === "homescreenFinished") {
@@ -118,7 +148,7 @@
                 }
             });
 
-            tutorialInstance.set(OverviewOnboardingTourSteps);
+            tutorialInstance.set(overviewOnboardingTourSteps);
             tutorialInstance.run();
         };
 
@@ -141,7 +171,7 @@
                 if ($('.work-package--results-tbody')) {
                     observerInstance.disconnect(); // stop observing
 
-                    tutorialInstance.set(WpOnboardingTourSteps);
+                    tutorialInstance.set(wpOnboardingTourSteps);
                     tutorialInstance.run();
                     return;
                 }
